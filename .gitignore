@@ -1,0 +1,26 @@
+# ambiente e caches locais
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+cache_fastf1/
+
+# dados brutos: o notebook baixa da API OpenF1 na primeira execução (cache em dados/openf1)
+dados/
+
+# arquivos gerados pela execução
+figuras/
+relatorio/
+resultados/
+
+# material da disciplina e versão estendida (em revisão)
+p2.pdf
+versao_completa/
+slides/
+
+# scripts auxiliares usados durante a redação (não são necessários para reproduzir)
+scripts/ajustes_figuras.py
+scripts/corrigir_enxuto.py
+scripts/inserir_textos.py
+scripts/textos_enxuto_v2.py
+scripts/ver_saidas.py
+scripts/openf1_client.py
