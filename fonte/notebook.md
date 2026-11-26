@@ -10,7 +10,7 @@ jupyter:
 
 ## Degradação de pneus na Fórmula 1 (GP de Barcelona 2026): abordagem bayesiana *vs.* frequentista
 
-*Trabalho final — Inferência Bayesiana* · **Aluno(a):** [seu nome] · **Data:** 26/11/2026
+*Trabalho final — Inferência Bayesiana* · **Aluno(a):** Cesar Eustaquio da Fonseca Filho · **Data:** 26/11/2026
 
 > **Resumo.** Com as 956 voltas válidas do GP de Barcelona 2026, estimamos quantos segundos cada composto de pneu perde por volta, descontando o efeito do combustível, do piloto e do carro. O modelo é uma regressão linear normal, estimada por Máxima Verossimilhança e pela abordagem bayesiana com priori conjugada Normal–Gama-Inversa, em dois cenários: vaga e informativa (construída a partir da corrida de 2025). A posteriori é obtida de forma exata e por um amostrador de Gibbs. Resultado principal: em 2026 o pneu médio perdeu **≈ 0,18 s por volta**, cerca de **2,5 vezes** o valor de 2025 (o macio, 0,21; o duro, 0,14). Por isso a priori informativa baseada em 2025 acabou atrapalhando.
 
@@ -286,7 +286,7 @@ $$
 
 **Cenário (a) — vaga:** $\mathbf m_0=\mathbf 0$, $V_0=10^6I_p$, $a_0=b_0=0{,}01$. Desvio-padrão *a priori* de centenas de segundos: "não sei nada". No limite $V_0^{-1}\to0$, $a_0,b_0\to0$ ela tende à priori imprópria $p(\beta,\sigma^2)\propto(\sigma^2)^{-(p/2+1)}$ (regra de Jeffreys conjunta), cuja posteriori é $\beta\mid\mathbf y\sim t_n\big(\hat\beta,\hat\sigma^2(X^\top X)^{-1}\big)$, ou seja, reproduz os números do EMV.
 
-**Cenário (b) — informativa (corrida de 2025):** usamos uma *power prior* (Ibrahim & Chen, 2000), $p(\theta\mid\mathcal D_{2025})\propto p(\mathcal D_{2025}\mid\theta)^{\alpha_0}\,p_{\text{vaga}}(\theta)$, com **$\alpha_0=0{,}1$**: como o regulamento mudou, a corrida de 2025 vale só 10% de uma corrida nova. Como o modelo de 2025 tem outros pilotos e equipes, a power prior é calculada no modelo de 2025 e dela herdamos só a marginal dos parâmetros físicos e de $\sigma^2$: se a power posterior é $\mathcal{NGI}(\tilde{\mathbf m},\tilde V,\tilde a,\tilde b)$, então $\mathbf m_{0,\text{fís}}=\tilde{\mathbf m}_{\text{fís}}$, $V_{0,\text{fís}}=\tilde V_{\text{fís}}$, $a_0=\tilde a$ e $b_0=\tilde b$. Pilotos e carros são novos, então para eles usamos conhecimento de domínio: intercepto centrado em 2025 com dp de 3 s, $\alpha_j\sim\mathcal N(0,1^2)$ s e $\gamma_k\sim\mathcal N(0,0{,}05^2)$ s/volta. (Na NGI, dar dp $d$ a um coeficiente significa $V_{0,jj}=d^2/\mathbb E[\sigma^2]$.)
+**Cenário (b) — informativa (corrida de 2025):** usamos uma *power prior* (Ibrahim & Chen, 2000), $p(\theta\mid\mathcal D_{2025})\propto p(\mathcal D_{2025}\mid\theta)^{\alpha_0}\,p_{\text{vaga}}(\theta)$, com **$\alpha_0=0{,}1$**: como o regulamento mudou, a corrida de 2025 vale só 10% de uma corrida nova. Como o modelo de 2025 tem outros pilotos e equipes, a power prior é calculada no modelo de 2025 e dela herdamos só a marginal dos parâmetros físicos e de $\sigma^2$: se a power posterior é $\mathcal{NGI}(\tilde{\mathbf m},\tilde V,\tilde a,\tilde b)$, então $\mathbf m_{0,\text{fís}}=\tilde{\mathbf m}_{\text{fís}}$, $V_{0,\text{fís}}=\tilde V_{\text{fís}}$, $a_0=\tilde a$ e $b_0=\tilde b$. Os efeitos de piloto e de equipe não são herdados de 2025: o grid mudou (a Cadillac estreou, a Sauber virou Audi e 4 dos 22 pilotos não aparecem nos dados de 2025) e, com o regulamento novo, a diferença de ritmo entre os carros também. Para eles usamos conhecimento de domínio: intercepto centrado em 2025 com dp de 3 s, $\alpha_j\sim\mathcal N(0,1^2)$ s e $\gamma_k\sim\mathcal N(0,0{,}05^2)$ s/volta. (Na NGI, dar dp $d$ a um coeficiente significa $V_{0,jj}=d^2/\mathbb E[\sigma^2]$.)
 
 ```python
 @dataclass
@@ -524,7 +524,7 @@ pd.DataFrame({"EMV [IC 95%]": {r: fmt(freq, r) for r in freq.index},
               "Bayes informativa: média [HPD 95%]": {r: fmt(bayes["info"], r) for r in freq.index}})
 ```
 
-**Leitura.** EMV e Bayes com priori vaga dão praticamente os mesmos números (as diferenças na 3ª casa decimal são erro de Monte Carlo do HPD), como prevê a teoria assintótica (Bernstein–von Mises). A priori informativa puxa a degradação do médio de 0,18 para **0,15 s/volta** e a do macio de 0,21 para 0,16: ela "acredita" no valor de 2025 (0,07), que os dados de 2026 contradizem. **O regulamento novo mudou o comportamento do pneu, e a informação antiga ficou desatualizada.**
+**Leitura.** EMV e Bayes com priori vaga dão praticamente os mesmos números, como prevê a teoria assintótica (Bernstein–von Mises). Nos coeficientes, as diferenças na 3ª casa decimal são erro de Monte Carlo do HPD: a posteriori exata (uma $t$ de Student) dá o mesmo intervalo do EMV. Em $\sigma^2$, a pequena diferença é real: a posteriori de $\sigma^2$ é uma gama-inversa, levemente assimétrica à direita, e por isso o HPD fica um pouco acima do IC simétrico do EMV ($[0{,}190;\,0{,}227]$ contra $[0{,}189;\,0{,}226]$). A priori informativa puxa a degradação do médio de 0,18 para **0,15 s/volta** e a do macio de 0,21 para 0,16: ela "acredita" no valor de 2025 (0,07), que os dados de 2026 contradizem. **O regulamento novo mudou o comportamento do pneu, e a informação antiga ficou desatualizada.**
 
 ### 6.2 Ajuste global: AIC/BIC *vs.* WAIC/LOO-CV
 
